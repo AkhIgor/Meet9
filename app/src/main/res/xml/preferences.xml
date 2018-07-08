@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="text_size"
+        android:title="Размер шрифта"
+        android:summary="Устанавливает размер шрифта"
+        android:defaultValue="14"
+        android:entries="@array/text_size"
+        android:entryValues="@array/text_size"
+        android:dialogTitle="Выберите размер шрифта" />
+
+    <ListPreference
+        android:key="text_style"
+        android:title="Стиль для шрифта"
+        android:summary="Устанавливает стиль для шрифта"
+        android:defaultValue="Обычный"
+        android:entries="@array/text_style"
+        android:entryValues="@array/text_style"
+        android:dialogTitle="Выберите стиль для шрифта" />
+
+</PreferenceScreen>
