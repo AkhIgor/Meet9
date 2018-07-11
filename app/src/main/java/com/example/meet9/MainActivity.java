@@ -29,6 +29,9 @@ public class MainActivity extends AppCompatActivity{
     private RecyclerView.Adapter adapter;
     private List<Note> NoteList;
 
+    private static final int CREATING = 1;
+    private static final int CHANGING = 2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,14 +41,18 @@ public class MainActivity extends AppCompatActivity{
 
         db = new DataBase(this);
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                NoteList = db.getNotes();
+            }
+        }).start();
+
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        NoteList = db.getNotes();
-
         adapter = new AdapterForNote(NoteList, this);
-        //adapter.notifyDataSetChanged();
         recyclerView.setAdapter(adapter);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -53,39 +60,38 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 Intent createNote = new Intent(MainActivity.this, CreatingActivity.class);
-                startActivity(createNote);
+                startActivityForResult(createNote, CREATING);
             }
         });
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK)
+        {
+            Intent intent = getIntent();
+            switch (requestCode) {
+                case CREATING:
+                {
+                    long id = NoteList.get(NoteList.size() - 1).getID();
+                    Note note = new Note( id, data.getStringExtra("Name"), data.getStringExtra("Date"), data.getStringExtra("Content"));
+                    NoteList.add(note);
 
-        NoteList = db.getNotes();
+                    adapter.notifyDataSetChanged();
 
-        adapter = new AdapterForNote(NoteList, this);
-        //adapter.notifyDataSetChanged();
-        recyclerView.setAdapter(adapter);
+                    break;
+                }
+                case CHANGING:
 
-//        SharedPreferences prefs = PreferenceManager
-//                .getDefaultSharedPreferences(this);
-//        float fSize = Float.parseFloat(prefs.getString(
-//                getString(R.string.pref_size), "20"));
-//// применяем настройки в текстовом поле
-//        mEditText.setTextSize(fSize);
-//
-//        String regular = prefs.getString(getString(R.string.pref_style), "");
-//        int typeface = Typeface.NORMAL;
-//
-//        if (regular.contains("Полужирный"))
-//            typeface += Typeface.BOLD;
-//
-//        if (regular.contains("Курсив"))
-//            typeface += Typeface.ITALIC;
-//
-//// меняем настройки в EditText
-//        mEditText.setTypeface(null, typeface);
+                    Note note = new Note(data.getIntExtra("ID", 0), data.getStringExtra("Name"), data.getStringExtra("Date"), data.getStringExtra("Content"));
+                    NoteList.set(data.getIntExtra("Position", 0), note);
+
+                    adapter.notifyDataSetChanged();
+
+                    break;
+            }
+        }
     }
 
     @Override
@@ -114,14 +120,4 @@ public class MainActivity extends AppCompatActivity{
         if (db != null)
             db.close();
     }
-
-//    @Override
-//    public void openEditor(String text, String color, long id, int position) {
-//
-//    }
-//
-//    @Override
-//    public void delete(final long id) {
-//
-//    }
 }

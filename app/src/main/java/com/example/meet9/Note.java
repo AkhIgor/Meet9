@@ -14,7 +14,7 @@ public class Note {
     public Note() {
     }
 
-    public Note(int id, String name, String date, String info) {
+    public Note(long id, String name, String date, String info) {
         this.ID = id;
         this.Name = name;
         this.Date = date;
