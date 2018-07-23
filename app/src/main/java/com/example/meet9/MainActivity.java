@@ -2,25 +2,18 @@ package com.example.meet9;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity{
 
@@ -31,6 +24,8 @@ public class MainActivity extends AppCompatActivity{
 
     private static final int CREATING = 1;
     private static final int CHANGING = 2;
+
+    protected int position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,9 +47,6 @@ public class MainActivity extends AppCompatActivity{
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new AdapterForNote(NoteList, this);
-        recyclerView.setAdapter(adapter);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,18 +55,23 @@ public class MainActivity extends AppCompatActivity{
                 startActivityForResult(createNote, CREATING);
             }
         });
+
+        adapter = new AdapterForNote(NoteList, this, new PositionListener());
+        recyclerView.setAdapter(adapter);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
+// super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK)
         {
             Intent intent = getIntent();
             switch (requestCode) {
                 case CREATING:
                 {
-                    long id = NoteList.get(NoteList.size() - 1).getID();
+                    long id = 0;
+                    if(NoteList.size() != 0)
+                        id = NoteList.get(NoteList.size() - 1).getID();
                     Note note = new Note( id, data.getStringExtra("Name"), data.getStringExtra("Date"), data.getStringExtra("Content"));
                     NoteList.add(note);
 
@@ -85,7 +82,7 @@ public class MainActivity extends AppCompatActivity{
                 case CHANGING:
 
                     Note note = new Note(data.getIntExtra("ID", 0), data.getStringExtra("Name"), data.getStringExtra("Date"), data.getStringExtra("Content"));
-                    NoteList.set(data.getIntExtra("Position", 0), note);
+                    NoteList.set(position, note);
 
                     adapter.notifyDataSetChanged();
 
@@ -119,5 +116,30 @@ public class MainActivity extends AppCompatActivity{
 
         if (db != null)
             db.close();
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
+
+    public interface OnPositionListener{
+        void onClick(Context context, int position, long id, String name, String content);
+    }
+
+    private class PositionListener implements OnPositionListener {
+
+        Context context;
+
+        @Override
+        public void onClick(Context context, int position, long id, String name, String content) {
+            this.context = context;
+            Intent intent = new Intent(context, EditActivity.class);
+            setPosition(position);
+            intent.putExtra("ID", id);
+            intent.putExtra("Name", name);
+            intent.putExtra("Content", content);
+            startActivityForResult(intent, CHANGING);
+        }
     }
 }

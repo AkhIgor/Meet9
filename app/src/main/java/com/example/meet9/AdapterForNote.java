@@ -1,27 +1,20 @@
 package com.example.meet9;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import static android.support.v4.app.ActivityCompat.startActivityForResult;
 
 /**
  * Created by Игорь on 06.07.2018.
@@ -40,17 +33,12 @@ public class AdapterForNote extends RecyclerView.Adapter<AdapterForNote.ViewHold
 
     private List<Note> ListNote;
     private Context context;
+    private MainActivity.OnPositionListener listener;
 
-
-
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-    }
-
-
-    public AdapterForNote(List<Note> listNote, Context context) {
+    public AdapterForNote(List<Note> listNote, Context context, MainActivity.OnPositionListener listener) {
         ListNote = listNote;
         this.context = context;
+        this.listener = listener;
     }
 
     @Override
@@ -119,17 +107,7 @@ public class AdapterForNote extends RecyclerView.Adapter<AdapterForNote.ViewHold
             EditButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent editNote = new Intent(context, EditActivity.class);
-                    editNote.putExtra("ID", id);
-                    editNote.putExtra("Name", Name.getText().toString());
-                    editNote.putExtra("Content", Content.getText().toString());
-                    editNote.putExtra("Number", getAdapterPosition());
-                    Toast.makeText(context, Integer.toString(getAdapterPosition()), Toast.LENGTH_SHORT).show();
-
-                    //context.startActivity(editNote);
-
-                    Activity origin = (Activity)context;
-                    origin.startActivityForResult(editNote, CHANGING);
+                    listener.onClick(context, getAdapterPosition(), id, Name.getText().toString(), Content.getText().toString());
                 }
             });
 
@@ -152,7 +130,6 @@ public class AdapterForNote extends RecyclerView.Adapter<AdapterForNote.ViewHold
                     notifyDataSetChanged();
                 }
             });
-
 
         }
 

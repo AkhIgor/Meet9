@@ -66,7 +66,6 @@ public class EditActivity extends AppCompatActivity {
                 main.putExtra("Name", name.getText().toString());
                 main.putExtra("Date", date);
                 main.putExtra("Content", content.getText().toString());
-                main.putExtra("Position", position);
                 setResult(RESULT_OK, main);
                 finish();
             }
